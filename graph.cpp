@@ -4,7 +4,8 @@
 
 Graph::Graph(const std::string& fileName)
 {
-    readGraph(fileName);
+    if(readGraph(fileName) == -1)
+        throw std::runtime_error("Invalid graph read");
 }
 
 int Graph::readGraph(const std::string& fileName)
@@ -52,6 +53,7 @@ int Graph::readGraph(const std::string& fileName)
     return 0;
 }
 
+//Finds the max distance between nodes
 float Graph::findMaxWeight(const std::string& startNode, const std::string& endNode)
 {
     auto distance = dijkstra(startNode);
@@ -60,9 +62,11 @@ float Graph::findMaxWeight(const std::string& startNode, const std::string& endN
 
     if(mMapNodeToIndex.find(endNode) == mMapNodeToIndex.end())
         return -1;
+
     auto retVal = distance[mMapNodeToIndex[endNode]];
     if( retVal == __INT_MAX__)
         return -1;
+
     return -retVal;
 }
 
@@ -72,6 +76,7 @@ std::vector<std::pair<std::string, double>> Graph::printShortestPath(const std::
     return path;
 }
 
+//Creates the distance ds using dijkstra algo
 std::vector<float> Graph::dijkstra(const std::string& startNode)
 {
     std::priority_queue<std::pair<float, std::string>, std::vector<std::pair<float, std::string>>, std::greater<std::pair<float, std::string>>> pq;
@@ -88,7 +93,6 @@ std::vector<float> Graph::dijkstra(const std::string& startNode)
             return {};
 
         size_t indexNode = mMapNodeToIndex[node];
-//        std::cerr << "node = " << node << " index = " << indexNode << "\n";
 
         pq.pop();
 
@@ -97,8 +101,7 @@ std::vector<float> Graph::dijkstra(const std::string& startNode)
             float dstNode = -xNode.first; // change sign to get the max
             std::string endNode = xNode.second;
             size_t idx = mMapNodeToIndex[endNode];
-//            std::cerr << "node = " << endNode << " index = " << idx << "\n";
-//            std::cerr << "dist + dstNode = " << dist + dstNode << "\n";
+
 
             if(dist + dstNode < distance[idx])
             {
@@ -110,24 +113,22 @@ std::vector<float> Graph::dijkstra(const std::string& startNode)
     return distance;
 }
 
-
+//find the max weight path from a start node to end node
 std::vector<std::pair<std::string, double>> Graph::findMaxWeightPath(const std::string &startNode, const std::string& endNode)
 {
     std::unordered_map<std::string, double> maxWeight;
 
     for (const auto& edge : edges)
     {
-        maxWeight[edge.startNode] = 0; // Initialize all weights to 0
+        maxWeight[edge.startNode] = 0;
         maxWeight[edge.endNode] = 0;
     }
 
-
-    // Create a priority queue for storing the nodes along with distances
-    // in the form of a pair { dist, node }.
     std::priority_queue<std::pair<float, std::string>, std::vector<std::pair<float, std::string>>, std::greater<std::pair<float, std::string>>> pq;
+
     std::unordered_map<std::string, std::string> parent;
 
-    maxWeight[startNode] = 0; // Weight of starting node is 0
+    maxWeight[startNode] = 0;
 
     pq.push({0, startNode});
 
@@ -150,7 +151,6 @@ std::vector<std::pair<std::string, double>> Graph::findMaxWeightPath(const std::
         }
     }
 
-    // Reconstruct the path
     std::vector<std::pair<std::string, double>> path;
     std::string currentNode = endNode;
     while (currentNode != startNode)
