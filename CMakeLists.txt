@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(weightedGraph LANGUAGES CXX)
+project(weighted-graph LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(weightedGraph main.cpp
+add_executable(weighted-graph main.cpp
     graph.h graph.cpp)
 
 include(GNUInstallDirs)
-install(TARGETS weightedGraph
+install(TARGETS weighted-graph
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )

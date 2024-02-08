@@ -18,7 +18,6 @@ int Graph::readGraph(const std::string& fileName)
 
     size_t index = 0;
 
-    std::vector<Edge>   edges;
     std::string         inputLine;
 
     while(std::getline(inFile, inputLine))
@@ -53,7 +52,7 @@ int Graph::readGraph(const std::string& fileName)
     return 0;
 }
 
-float Graph::findMaxWeightPath(const std::string& startNode, const std::string& endNode)
+float Graph::findMaxWeight(const std::string& startNode, const std::string& endNode)
 {
     auto distance = dijkstra(startNode);
     if(distance.empty())
@@ -65,6 +64,12 @@ float Graph::findMaxWeightPath(const std::string& startNode, const std::string& 
     if( retVal == __INT_MAX__)
         return -1;
     return -retVal;
+}
+
+std::vector<std::pair<std::string, double>> Graph::printShortestPath(const std::string& startNode, const std::string& endNode)
+{
+    auto path = findMaxWeightPath(startNode, endNode);
+    return path;
 }
 
 std::vector<float> Graph::dijkstra(const std::string& startNode)
@@ -105,3 +110,56 @@ std::vector<float> Graph::dijkstra(const std::string& startNode)
     return distance;
 }
 
+
+std::vector<std::pair<std::string, double>> Graph::findMaxWeightPath(const std::string &startNode, const std::string& endNode)
+{
+    std::unordered_map<std::string, double> maxWeight;
+
+    for (const auto& edge : edges)
+    {
+        maxWeight[edge.startNode] = 0; // Initialize all weights to 0
+        maxWeight[edge.endNode] = 0;
+    }
+
+
+    // Create a priority queue for storing the nodes along with distances
+    // in the form of a pair { dist, node }.
+    std::priority_queue<std::pair<float, std::string>, std::vector<std::pair<float, std::string>>, std::greater<std::pair<float, std::string>>> pq;
+    std::unordered_map<std::string, std::string> parent;
+
+    maxWeight[startNode] = 0; // Weight of starting node is 0
+
+    pq.push({0, startNode});
+
+    while (!pq.empty()) {
+        std::string currentNode = pq.top().second;
+        pq.pop();
+
+        for (const Edge& edge : edges)
+        {
+            if (edge.startNode == currentNode)
+            {
+                double newWeight = maxWeight[currentNode] + edge.distance;
+                if (newWeight > maxWeight[edge.endNode])
+                {
+                    maxWeight[edge.endNode] = newWeight;
+                    parent[edge.endNode] = currentNode;
+                    pq.push({newWeight, edge.endNode});
+                }
+            }
+        }
+    }
+
+    // Reconstruct the path
+    std::vector<std::pair<std::string, double>> path;
+    std::string currentNode = endNode;
+    while (currentNode != startNode)
+    {
+        path.push_back({currentNode, maxWeight[currentNode]});
+        currentNode = parent[currentNode];
+    }
+    path.push_back({startNode, maxWeight[startNode]});
+    reverse(path.begin(), path.end());
+
+    return path;
+}
